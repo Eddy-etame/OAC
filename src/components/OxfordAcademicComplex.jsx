@@ -1,783 +1,886 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion'; // This is the corrected line
-import { Menu, X, ChevronDown, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform, LayoutGroup } from 'framer-motion';
+import { Menu, X, ChevronDown, MapPin, Phone, Mail, ArrowRight, Instagram, Linkedin, Twitter, Target, BookOpen, GraduationCap, Users, Clock, CheckCircle, Sun, Moon } from 'lucide-react';
 
+// Images (now verified and high quality)
+import heroBg from '../assets/images/hero-bg.jpg';
+import aboutImg from '../assets/images/about.jpg';
+import nurseryImg from '../assets/images/nursery.jpg';
+import primaryImg from '../assets/images/primary.jpg';
+import upperPrimaryImg from '../assets/images/upper-primary.jpg';
+import campusLoum from '../assets/images/campus-loum.jpg';
+import campusTombel from '../assets/images/campus-tombel.jpg';
 
-function ImageWithFallback(props) {
-  const [didError, setDidError] = useState(false);
-  const { src, alt, style, className, ref, ...rest } = props;
+// Reusable animated text reveal component
+const RevealText = ({ children, delay = 0, className = "" }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-10%" }}
+    transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+    className={className}
+  >
+    {children}
+  </motion.div>
+);
 
-  // Warn if a string ref is passed
-  if (typeof ref === 'string') {
-    console.warn(`String refs are not supported in ImageWithFallback. Received ref: "${ref}". Use useRef instead.`);
-  }
+export default function OxfordAcademicComplex() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [selectedCampus, setSelectedCampus] = useState('all');
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : false;
+  });
 
-  return didError ? (
-    <div
-      className={`inline-block bg-gray-100 text-center align-middle ${className ?? ''}`}
-      style={style}
-    >
-      <div className="flex items-center justify-center w-full h-full">
-        <img
-          src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg=="
-          alt="Error loading image"
-          {...rest}
-          data-original-url={src}
-        />
-      </div>
-    </div>
-  ) : (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      style={style}
-      {...rest}
-      onError={() => setDidError(true)}
-    />
-  );
-}
+  // Form State
+  const [formStatus, setFormStatus] = useState(''); 
 
-export default function OxfordAcademicComplex({ 
-  animationDuration = 0.5, 
-  primaryColor = "#6b21a8", 
-  secondaryColor = "#4b5563" 
-}) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const [isScrolled, setIsScrolled] = useState(false);
-  
-    const homeRef = useRef(null);
+  const homeRef = useRef(null);
   const aboutRef = useRef(null);
   const programsRef = useRef(null);
+  const secondaryRef = useRef(null);
   const campusesRef = useRef(null);
+  const admissionsRef = useRef(null);
+  const uniformRef = useRef(null);
   const whyChooseRef = useRef(null);
   const contactRef = useRef(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-      
-      const scrollPosition = window.scrollY + 100;
-      
-      const sections = [
-        { id: 'home', ref: homeRef },
-        { id: 'about', ref: aboutRef },
-        { id: 'programs', ref: programsRef },
-        { id: 'campuses', ref: campusesRef },
-        { id: 'why-choose', ref: whyChooseRef },
-        { id: 'contact', ref: contactRef }
-      ];
-      
-      for (const section of sections) {
-        if (section.ref.current) {
-          const element = section.ref.current;
-          const offsetTop = element.offsetTop;
-          const height = element.offsetHeight;
-          
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + height) {
-            setActiveSection(section.id);
-            break;
-          }
-        }
-      }
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { scrollYProgress } = useScroll({ target: homeRef, offset: ["start start", "end start"] });
+  const yHero = useTransform(scrollYProgress, [0, 1], [0, 250]);
+  const opacityHero = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  const scrollToSection = (sectionRef) => {
-    setIsMenuOpen(false);
-    sectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
 
-  const navLinks = [
-    { id: 'home', label: 'Home', ref: homeRef },
-    { id: 'about', label: 'About Us', ref: aboutRef },
-    { id: 'programs', label: 'Programs', ref: programsRef },
-    { id: 'campuses', label: 'Campuses', ref: campusesRef },
-    { id: 'why-choose', label: 'Why Choose Us', ref: whyChooseRef },
-    { id: 'contact', label: 'Contact', ref: contactRef }
-  ];
+      const scrollPosition = window.scrollY + 100;
+      const sections = [
+        { id: 'home', ref: homeRef },
+        { id: 'about', ref: aboutRef },
+        { id: 'programs', ref: programsRef },
+        { id: 'secondary', ref: secondaryRef },
+        { id: 'campuses', ref: campusesRef },
+        { id: 'admissions', ref: admissionsRef },
+        { id: 'uniform', ref: uniformRef },
+        { id: 'why-choose', ref: whyChooseRef },
+        { id: 'contact', ref: contactRef }
+      ];
 
-  const programs = [
-    {
-      id: 1,
-      title: 'Nursery Section',
-      description: 'Early childhood education focusing on foundational skills, creativity, and social development.',
-      image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=1120&q=80',
-      duration: '2 years',
-      requirements: 'Children aged 3-5'
-    },
-    {
-      id: 2,
-      title: 'Lower Primary (Classes 1-3)',
-      description: 'Building literacy, numeracy, and curiosity through engaging, child-centred lessons.',
-      image: 'https://images.unsplash.com/photo-1588072432882-9cb19c16c009?auto=format&fit=crop&w=1120&q=80',
-      duration: '3 years',
-      requirements: 'Completion of Nursery or equivalent'
-    },
-    {
-      id: 3,
-      title: 'Upper Primary (Classes 4-6)',
-      description: 'Strengthening core subjects and preparing pupils for a smooth transition to secondary education.',
-      image: 'https://images.unsplash.com/photo-1600404291745-45a088e02c34?auto=format&fit=crop&w=1120&q=80',
-      duration: '3 years',
-      requirements: 'Completion of Lower Primary'
-    },
-    {
-      id: 4,
-      title: 'After-School Enrichment',
-      description: 'Extracurricular clubs, tutoring, and mentorship to nurture talents and reinforce classroom learning.',
-      image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1120&q=80',
-      duration: 'Ongoing',
-      requirements: 'Enrolled OAC pupil'
-    }
-  ];
+      for (const section of sections) {
+        if (section.ref.current) {
+          const element = section.ref.current;
+          if (scrollPosition >= element.offsetTop && scrollPosition < element.offsetTop + element.offsetHeight) {
+            setActiveSection(section.id);
+            break;
+          }
+        }
+      }
+    };
 
-  const campuses = [
-    {
-      id: 1,
-      name: 'Loum Campus',
-      image: 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1186&q=80',
-      description: 'Our main campus located in the heart of Loum, featuring modern facilities and a vibrant learning environment.'
-    },
-    {
-      id: 2,
-      name: 'Tombel Campus',
-      image: 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1169&q=80',
-      description: 'Our Tombel campus provides a serene environment conducive for learning and academic excellence.'
-    }
-  ];
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  const benefits = [
-    {
-      id: 1,
-      title: 'Accredited Excellence',
-      description: 'Our certifications are valid and highly regarded, accredited by MINESUP and mentored by the University of Bamenda.',
-      icon: <motion.div className="p-3 rounded-full bg-purple-100" whileHover={{ scale: 1.1 }} transition={{ duration: animationDuration }}>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </motion.div>
-    },
-    {
-      id: 2,
-      title: 'Flexible Learning',
-      description: 'We offer both online and in-person classes to fit your life, making education accessible to all.',
-      icon: <motion.div className="p-3 rounded-full bg-purple-100" whileHover={{ scale: 1.1 }} transition={{ duration: animationDuration }}>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </motion.div>
-    },
-    {
-      id: 3,
-      title: 'Affordable Tuition',
-      description: 'We provide flexible payment options to make quality education accessible to everyone.',
-      icon: <motion.div className="p-3 rounded-full bg-purple-100" whileHover={{ scale: 1.1 }} transition={{ duration: animationDuration }}>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </motion.div>
-    },
-    {
-      id: 4,
-      title: 'Career-Focused',
-      description: 'Our programs include practical training, internships, and mentorship to prepare you for immediate career success.',
-      icon: <motion.div className="p-3 rounded-full bg-purple-100" whileHover={{ scale: 1.1 }} transition={{ duration: animationDuration }}>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      </motion.div>
-    }
-  ];
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
 
-  return (
-    <div className="font-sans min-h-screen bg-white">
-      {/* Navigation */}
-      <header 
-        className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}
-      >
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex justify-between items-center">
-            <motion.div 
-              className="flex items-center"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: animationDuration }}
-            >
-              <div className="text-2xl font-bold text-purple-800 mr-2">OAC</div>
-              <div className={`hidden md:block text-sm font-medium mr-6 ${isScrolled ? 'text-gray-700' : 'text-white'}`}>Oxford Academic Complex</div>
-            </motion.div>
-            
-            {/* Desktop Navigation */}
-                        <nav className="hidden md:flex space-x-6 whitespace-nowrap">
+  const scrollToSection = (sectionRef) => {
+    setIsMenuOpen(false);
+    sectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const navLinks = [
+    { id: 'home', label: 'Home', ref: homeRef },
+    { id: 'about', label: 'About', ref: aboutRef },
+    { id: 'programs', label: 'Programs', ref: programsRef },
+    { id: 'secondary', label: 'Secondary', ref: secondaryRef },
+    { id: 'campuses', label: 'Campuses', ref: campusesRef },
+    { id: 'admissions', label: 'Admissions', ref: admissionsRef },
+    { id: 'contact', label: 'Contact', ref: contactRef }
+  ];
+
+  const programs = [
+    { 
+      title: 'Nursery Section', 
+      desc: 'Early childhood education focusing on foundational skills, creativity, and social development in a safe, nurturing environment.', 
+      img: nurseryImg,
+      duration: '2 Years',
+      requirements: 'Children aged 3-5',
+      campuses: ['tombel', 'loum']
+    },
+    { 
+      title: 'Lower Primary (Classes 1-3)', 
+      desc: 'Building literacy, numeracy, and curiosity through engaging, child-centered lessons designed for active young minds.', 
+      img: primaryImg,
+      duration: '3 Years',
+      requirements: 'Completion of Nursery or equivalent',
+      campuses: ['tombel']
+    },
+    { 
+      title: 'Upper Primary & Beyond', 
+      desc: 'Strengthening core subjects and preparing pupils for a seamless transition to our renowned secondary and technical streams.', 
+      img: upperPrimaryImg,
+      duration: '3+ Years',
+      requirements: 'Completion of Lower Primary',
+      campuses: ['tombel']
+    },
+  ];
+
+  const filteredPrograms = selectedCampus === 'all' 
+    ? programs 
+    : programs.filter(prog => prog.campuses.includes(selectedCampus));
+
+  const benefits = [
+    { title: 'Purely Anglo-Saxon Education', desc: 'We follow the British educational system with qualified GCE examiners as teachers.', icon: <BookOpen className="w-6 h-6 text-brand-900" /> },
+    { title: '17+ Years Experience', desc: 'Over 17 years of educational excellence with seasoned administrative staff.', icon: <GraduationCap className="w-6 h-6 text-brand-900" /> },
+    { title: 'Qualified Teachers', desc: 'Our teachers are mostly GCE examiners with extensive experience.', icon: <Target className="w-6 h-6 text-brand-900" /> },
+    { title: 'Flexible Payment', desc: 'Parents have the privilege to pay school fees at their convenience.', icon: <Users className="w-6 h-6 text-brand-900" /> },
+  ];
+
+  const secondaryPrograms = [
+    {
+      title: 'General Education',
+      subtitle: '1st & 2nd Cycle - Arts & Science',
+      desc: 'Comprehensive arts and science programs preparing students for GCE Ordinary and Advanced Level examinations.',
+      features: ['Arts Stream', 'Science Stream', 'GCE O-Level Preparation', 'GCE A-Level Preparation']
+    },
+    {
+      title: 'Technical/Vocational Education',
+      subtitle: '1st & 2nd Cycle',
+      desc: 'Practical skills development in accounting, marketing, and secretarial studies for career-ready graduates.',
+      features: ['Accounting Studies', 'Marketing', 'Secretarial Studies', 'Industry-Ready Skills']
+    },
+    {
+      title: 'Commercial Education',
+      subtitle: '1st & 2nd Cycle',
+      desc: 'Business-focused education combining theory with practical applications for commerce careers.',
+      features: ['Business Management', 'Commerce', 'Entrepreneurship', 'Financial Literacy']
+    }
+  ];
+
+  const campuses = [
+    {
+      name: 'Bepanda Mallah-Douala',
+      img: campusTombel, // Using existing image as placeholder
+      desc: 'Behind CAMTEL, Bepanda Mallah-Douala. Secondary/College campus offering General, Technical, and Commercial education.',
+      programs: ['Secondary Only', 'General Education', 'Technical/Vocational', 'Commercial'],
+      contact: '+237 XXX XXX XXX', // CHANGE ME: Actual phone number
+      address: 'Behind CAMTEL, Bepanda Mallah-Douala' // CHANGE ME: Exact address
+    },
+    {
+      name: 'Tombel Campus',
+      img: campusTombel,
+      desc: 'Tombel, South West Region. Our historic main center offering Nursery, Primary, and Secondary education.',
+      programs: ['Nursery', 'Primary', 'Secondary'],
+      contact: '+237 XXX XXX XXX', // CHANGE ME: Actual phone number
+      address: 'Main Road, Tombel, South West Region, CMR' // CHANGE ME: Exact address
+    },
+    {
+      name: 'Loum Campus',
+      img: campusLoum,
+      desc: 'Loum, Littoral Region. A vibrant, modern hub serving our coastal students with Nursery education.',
+      programs: ['Nursery Only'],
+      contact: '+237 XXX XXX XXX', // CHANGE ME: Actual phone number
+      address: 'Littoral Hub, Loum, Littoral Region, CMR' // CHANGE ME: Exact address
+    }
+  ];
+
+  return (
+    <div className="font-sans min-h-screen bg-sand-100 dark:bg-gray-900 overflow-hidden text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      
+      {/* ===== HEADER ===== */}
+      <header className={`fixed w-full z-50 transition-all duration-500 border-b border-transparent ${isScrolled ? 'glass py-3 shadow-sm border-white/20' : 'bg-transparent py-5'}`}>
+        <div className="container mx-auto px-6">
+          <div className="flex justify-between items-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection(homeRef)}>
+              <div className="w-10 h-10 bg-brand-900 rounded-xl flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-display font-bold text-gray-900 dark:text-white">Oxford Academic Complex</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Bepanda • Tombel • Loum</p>
+              </div>
+            </motion.div>
+
+            {/* Desktop Nav */}
+            <nav className="hidden lg:flex items-center gap-8">
               {navLinks.map((link) => (
-                <motion.button
+                <button
                   key={link.id}
-                  type="button"
-                  className={`text-sm font-medium transition-colors whitespace-nowrap ${
-                    activeSection === link.id 
-                      ? 'text-purple-800 border-b-2 border-purple-800' 
-                      : isScrolled ? 'text-gray-700 hover:text-purple-800' : 'text-white hover:text-purple-300'
-                  }`}
                   onClick={() => scrollToSection(link.ref)}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: animationDuration / 2 }}
+                  className={`text-sm font-medium transition-colors ${
+                    activeSection === link.id ? 'text-brand-900 dark:text-brand-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
                 >
                   {link.label}
-                </motion.button>
+                </button>
               ))}
+              
+              {/* Theme Toggle */}
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {isDarkMode ? (
+                  <Sun className="w-5 h-5 text-yellow-400" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-700" />
+                )}
+              </button>
             </nav>
-            
-                        {/* Mobile Menu Button */}
-            <motion.button
-              className="md:hidden text-purple-800"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              type="button"
+
+            <div className="flex items-center gap-2">
+              {/* Theme Toggle Mobile & Tablet */}
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="lg:hidden p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {isDarkMode ? (
+                  <Sun className="w-5 h-5 text-yellow-400" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-700" />
+                )}
+              </button>
+              
+              <button
+                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Nav Area */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden glass border-t border-white/20 dark:border-gray-700 mt-3 bg-white/95 dark:bg-gray-900/95"
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </motion.button>
-          </div>
-        </div>
-        
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <motion.div 
-            className="md:hidden bg-white shadow-lg"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: animationDuration / 2 }}
-          >
-            <div className="container mx-auto px-4 py-3">
-              <div className="flex flex-col space-y-3">
-                                {navLinks.map((link) => (
+              <div className="container mx-auto px-6 py-4 flex flex-col gap-2">
+                {navLinks.map((link) => (
                   <button
                     key={link.id}
-                    type="button"
-                    className={`text-left py-2 px-4 rounded-md text-sm font-medium ${
+                    onClick={() => {
+                      scrollToSection(link.ref);
+                      setIsMenuOpen(false);
+                    }}
+                    onTouchEnd={() => {
+                      scrollToSection(link.ref);
+                      setIsMenuOpen(false);
+                    }}
+                    className={`text-left px-4 py-3 rounded-xl text-lg font-display transition-colors cursor-pointer ${
                       activeSection === link.id 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-brand-500 text-white' 
+                        : 'text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
-                    onClick={() => scrollToSection(link.ref)}
                   >
                     {link.label}
                   </button>
                 ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </header>
-      
-      {/* Hero Section */}
-      <section 
-        ref={homeRef}
-        className="relative min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-900 to-purple-700 text-white"
-        id="home"
-      >
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute inset-0 bg-black opacity-50"></div>
-          <ImageWithFallback
-            src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
-            alt="Oxford Academic Complex"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        
-        <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: animationDuration, delay: animationDuration / 2 }}
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">Oxford Academic Complex</h1>
-            <p className="text-xl md:text-2xl font-light mb-8">Education with a Vision</p>
-            <p className="max-w-3xl mx-auto text-lg mb-10">
-              We are a premier academic institution in Cameroon, dedicated to empowering the next generation of leaders and professionals through flexible, accredited, and career-focused programs.
-            </p>
-            
-                        <motion.button
-              type="button"
-              className="bg-white text-purple-800 px-8 py-3 rounded-full font-medium shadow-lg flex items-center mx-auto"
-              whileHover={{ scale: 1.05, backgroundColor: '#f9fafb' }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: animationDuration / 2 }}
-              onClick={() => scrollToSection(contactRef)}
-            >
-              Get Started <ArrowRight className="ml-2 h-5 w-5" />
-            </motion.button>
-          </motion.div>
-        </div>
-        
-        <div className="absolute bottom-10 left-0 right-0 flex justify-center">
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5 }}
-          >
-            <ChevronDown className="h-8 w-8 text-white opacity-70" />
-          </motion.div>
-        </div>
-      </section>
-      
-      {/* About Us Section */}
-      <section 
-        ref={aboutRef}
-        className="py-20 bg-gray-50"
-        id="about"
-      >
-        <div className="container mx-auto px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Vision, Our Commitment</h2>
-            <div className="w-20 h-1 bg-purple-800 mx-auto mb-6"></div>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: animationDuration }}
-            >
-              <ImageWithFallback
-                src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
-                alt="About Oxford Academic Complex"
-                className="rounded-lg shadow-xl w-full h-auto"
-              />
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: animationDuration }}
-            >
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4">At Oxford Academic Complex (OAC)</h3>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                We believe in providing an education that goes beyond the classroom. Our campuses are built on the vision of nurturing intellectual curiosity, professional integrity, and leadership. Our expert faculty and a supportive learning environment ensure that every student is equipped with the knowledge and skills necessary to excel in their chosen field.
-              </p>
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                The hands in our logo symbolize the supportive role of our institution in lifting students to a higher level of achievement. We are committed to integrity, leadership development, and preparing students to be active contributors to society.
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-1 bg-purple-800 mr-4"></div>
-                <p className="text-purple-800 font-semibold">Education with a Vision</p>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Programs Section */}
-      <section 
-        ref={programsRef}
-        className="py-20 bg-white"
-        id="programs"
-      >
-        <div className="container mx-auto px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Nursery &amp; Primary Programs</h2>
-            <div className="w-20 h-1 bg-purple-800 mx-auto mb-6"></div>
-            <p className="max-w-3xl mx-auto text-gray-600">
-              We provide engaging, age-appropriate curricula that lay a solid academic and social foundation for every child.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {programs.map((program, index) => (
-              <motion.div
-                key={program.id}
-                className="bg-white rounded-lg shadow-lg overflow-hidden"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: animationDuration, delay: index * 0.1 }}
-                whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-              >
-                <div className="h-48 overflow-hidden">
-                  <ImageWithFallback
-                    src={program.image}
-                    alt={program.title}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{program.title}</h3>
-                  <p className="text-gray-600 mb-4">{program.description}</p>
-                  <div className="flex flex-col space-y-2 text-sm text-gray-700">
-                    <div className="flex items-center">
-                      <span className="font-medium mr-2">Duration:</span> {program.duration}
-                    </div>
-                    <div className="flex items-center">
-                      <span className="font-medium mr-2">Requirements:</span> {program.requirements}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          
-          <motion.div
-            className="text-center mt-12"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration, delay: 0.4 }}
-          >
-            <p className="text-gray-600 mb-6">
-              All our programs are fully accredited by MINESUP and mentored by the University of Bamenda, ensuring a recognized and respected certification.
-            </p>
-                        <motion.button
-              type="button"
-              className="bg-purple-800 text-white px-6 py-3 rounded-full font-medium shadow-md inline-flex items-center"
-              whileHover={{ scale: 1.05, backgroundColor: '#7e22ce' }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: animationDuration / 2 }}
-              onClick={() => scrollToSection(contactRef)}
-            >
-              Apply Now <ArrowRight className="ml-2 h-5 w-5" />
-            </motion.button>
-          </motion.div>
-        </div>
-      </section>
-      
-      {/* Campuses Section */}
-      <section 
-        ref={campusesRef}
-        className="py-20 bg-gray-50"
-        id="campuses"
-      >
-        <div className="container mx-auto px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Campuses</h2>
-            <div className="w-20 h-1 bg-purple-800 mx-auto mb-6"></div>
-            <p className="max-w-3xl mx-auto text-gray-600">
-              Oxford Academic Complex proudly serves students at our state-of-the-art campuses.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 gap-12">
-            {campuses.map((campus, index) => (
-              <motion.div
-                key={campus.id}
-                className="bg-white rounded-lg shadow-lg overflow-hidden"
-                initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: animationDuration }}
-                whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-              >
-                <div className="md:flex">
-                  <div className="md:w-2/5">
-                    <ImageWithFallback
-                      src={campus.image}
-                      alt={campus.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="md:w-3/5 p-6">
-                    <div className="flex items-center mb-4">
-                      <MapPin className="h-5 w-5 text-purple-800 mr-2" />
-                      <h3 className="text-xl font-semibold text-gray-900">{campus.name}</h3>
-                    </div>
-                    <p className="text-gray-600">{campus.description}</p>
-                                      <motion.button
-                    type="button"
-                    className="mt-4 text-purple-800 font-medium inline-flex items-center"
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: animationDuration / 2 }}
-                  >
-                    View Campus <ArrowRight className="ml-1 h-4 w-4" />
-                  </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* Why Choose Us Section */}
-      <section 
-        ref={whyChooseRef}
-        className="py-20 bg-white"
-        id="why-choose"
-      >
-        <div className="container mx-auto px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose OAC?</h2>
-            <div className="w-20 h-1 bg-purple-800 mx-auto mb-6"></div>
-            <p className="max-w-3xl mx-auto text-gray-600">
-              We are committed to providing quality education that prepares you for a successful career.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={benefit.id}
-                className="bg-white rounded-lg p-6 shadow-md"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: animationDuration, delay: index * 0.1 }}
-                whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}
-              >
-                <div className="mb-4">{benefit.icon}</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{benefit.title}</h3>
-                <p className="text-gray-600">{benefit.description}</p>
-              </motion.div>
-            ))}
-          </div>
-          
-          <motion.div
-            className="mt-16 bg-purple-100 rounded-lg p-8 text-center"
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration }}
-          >
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4">Start your journey towards a successful career today</h3>
-            <p className="text-gray-700 mb-6 max-w-3xl mx-auto">
-              Contact us to learn more about our programs and enrollment process for the next academic year.
-            </p>
-                        <motion.button
-              type="button"
-              className="bg-purple-800 text-white px-8 py-3 rounded-full font-medium shadow-md inline-flex items-center"
-              whileHover={{ scale: 1.05, backgroundColor: '#7e22ce' }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: animationDuration / 2 }}
-              onClick={() => scrollToSection(contactRef)}
-            >
-              Contact Us <ArrowRight className="ml-2 h-5 w-5" />
-            </motion.button>
-          </motion.div>
-        </div>
-      </section>
-      
-      {/* Contact Section */}
-      <section 
-        ref={contactRef}
-        className="py-20 bg-gray-50"
-        id="contact"
-      >
-        <div className="container mx-auto px-4 md:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: animationDuration }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Let's Connect</h2>
-            <div className="w-20 h-1 bg-purple-800 mx-auto mb-6"></div>
-            <p className="max-w-3xl mx-auto text-gray-600">
-              Have questions about our programs or the enrollment process? We're here to help.
-            </p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-2 gap-12">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: animationDuration }}
-            >
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Contact Information</h3>
-              
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <Phone className="h-6 w-6 text-purple-800 mr-4 mt-1" />
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-1">Phone</h4>
-                    <p className="text-gray-600">+237 677484187</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <Mail className="h-6 w-6 text-purple-800 mr-4 mt-1" />
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-1">Email</h4>
-                    <p className="text-gray-600">info@oxfordacademiccomplex.com</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <MapPin className="h-6 w-6 text-purple-800 mr-4 mt-1" />
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-1">Locations</h4>
-                    <p className="text-gray-600 mb-2">Loum Campus, Cameroon</p>
-                    <p className="text-gray-600">Tombel Campus, Cameroon</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-8">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">Follow Us</h4>
-                                <div className="flex space-x-4">
-                  <motion.a
-                    href="#"
-                    className="bg-purple-100 p-3 rounded-full text-purple-800"
-                    whileHover={{ scale: 1.1, backgroundColor: '#ede9fe' }}
-                    transition={{ duration: animationDuration / 2 }}
-                    aria-label="Follow us on Facebook"
-                    title="Facebook"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
-                    </svg>
-                  </motion.a>
-                  <motion.a
-                    href="#"
-                    className="bg-purple-100 p-3 rounded-full text-purple-800"
-                    whileHover={{ scale: 1.1, backgroundColor: '#ede9fe' }}
-                    transition={{ duration: animationDuration / 2 }}
-                    aria-label="Follow us on Twitter"
-                    title="Twitter"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
-                    </svg>
-                  </motion.a>
-                  <motion.a
-                    href="#"
-                    className="bg-purple-100 p-3 rounded-full text-purple-800"
-                    whileHover={{ scale: 1.1, backgroundColor: '#ede9fe' }}
-                    transition={{ duration: animationDuration / 2 }}
-                    aria-label="Follow us on Instagram"
-                    title="Instagram"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
-                    </svg>
-                  </motion.a>
-                  <motion.a
-                    href="#"
-                    className="bg-purple-100 p-3 rounded-full text-purple-800"
-                    whileHover={{ scale: 1.1, backgroundColor: '#ede9fe' }}
-                    transition={{ duration: animationDuration / 2 }}
-                    aria-label="Follow us on LinkedIn"
-                    title="LinkedIn"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
-                    </svg>
-                  </motion.a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* ===== HERO ===== */}
+      <section ref={homeRef} id="home" className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-brand-950">
+        <motion.div className="absolute inset-0 w-full h-full" style={{ y: yHero, opacity: opacityHero }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-950/80 via-brand-900/50 to-brand-950 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-brand-950/60 via-transparent to-brand-950/60 z-10" />
+          <img src={heroBg} alt="OAC Campus" loading="eager" className="w-full h-full object-cover scale-105" />
+          {/* Glow effects */}
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-500/30 rounded-full blur-[128px] animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-700/30 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: '1s' }} />
+        </motion.div>
+
+        <div className="container relative z-20 mx-auto px-6 text-center text-white mt-16">
+          <RevealText>
+            <span className="inline-block py-1 px-3 rounded-full border border-white/20 glass text-xs font-semibold tracking-widest uppercase mb-6">Cameroon's Premier Institution</span>
+          </RevealText>
+          <RevealText delay={0.1}>
+            <h1 className="text-6xl md:text-8xl font-display font-bold tracking-tighter text-balance mb-6">
+              Education with <br/><span className="text-brand-300">a Vision.</span>
+            </h1>
+          </RevealText>
+          <RevealText delay={0.2} className="max-w-2xl mx-auto">
+            <p className="text-lg md:text-xl text-white/80 font-light text-balance mb-10 leading-relaxed">
+              Empowering the next generation of leaders through accredited, career-focused nursery, primary, and secondary education in Bepanda, Tombel, and Loum.
+            </p>
+          </RevealText>
+          <RevealText delay={0.3}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button onClick={() => scrollToSection(programsRef)} className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-brand-950 font-semibold hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-xl shadow-white/10">
+                Explore Programs
+              </button>
+              <button onClick={() => scrollToSection(contactRef)} className="w-full sm:w-auto px-8 py-4 rounded-full glass border border-white/30 text-white font-medium hover:bg-white/10 transition-colors">
+                Contact Admissions
+              </button>
+            </div>
+          </RevealText>
+        </div>
+
+        <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }} className="absolute bottom-10 z-20 text-white/50 cursor-pointer" onClick={() => scrollToSection(aboutRef)}>
+          <ChevronDown className="w-8 h-8" />
+        </motion.div>
+
+        {/* Scroll Progress Indicator */}
+        <motion.div 
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+        >
+          {navLinks.map((link) => (
+            <div key={link.id} className="relative group">
+              <div 
+                className={`w-1 h-12 rounded-full transition-all duration-300 ${
+                  activeSection === link.id ? 'bg-brand-400 h-16' : 'bg-white/30 hover:bg-white/50'
+                }`}
+              />
+              <span className="absolute right-8 top-1/2 -translate-y-1/2 text-white/70 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                {link.label}
+              </span>
+            </div>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* ===== ABOUT ===== */}
+      <section ref={aboutRef} id="about" className="py-16 md:py-24 lg:py-32 relative bg-sand-100 dark:bg-gray-800">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
+            <div>
+              <RevealText><h2 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-8 text-gray-900 dark:text-white">Education with <br/><span className="text-brand-900 dark:text-brand-400">a Vision.</span></h2></RevealText>
+              <RevealText delay={0.1}>
+                <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+                  At Oxford Academic Complex (OAC), we provide <strong className="text-brand-900 font-semibold">purely Anglo-Saxon education</strong> across our three campuses in Bepanda, Tombel, and Loum. Founded by seasoned educationists, we are a fully recognized <strong className="text-brand-900 font-semibold">MINESEC institution and GCE Examination Center</strong>.
+                </p>
+              </RevealText>
+              <RevealText delay={0.2}>
+                <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+                  With over <strong className="text-brand-900 font-semibold">17 years of educational excellence</strong>, our qualified teachers (most are GCE examiners) are deeply committed to integrity, technical proficiency, and leadership development in a calm, conducive learning environment.
+                </p>
+              </RevealText>
+              
+              <RevealText delay={0.3}>
+                <div className="grid grid-cols-2 gap-8 py-6 border-y border-gray-200">
+                  <div>
+                    <p className="text-4xl font-display font-bold text-brand-900 mb-1">17+</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium tracking-wide">Years Experience</p>
+                  </div>
+                  <div>
+                    <p className="text-4xl font-display font-bold text-brand-900 mb-1">3</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium tracking-wide">Campuses</p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: animationDuration }}
-            >
-              <h3 className="text-2xl font-semibold text-gray-900 mb-6">Send us a message</h3>
-              <form className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-                  <input type="text" id="name" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-                  <input type="email" id="email" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
-                  <textarea id="message" rows="4" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"></textarea>
-                </div>
-                <motion.button
-                  type="submit"
-                  className="bg-purple-800 text-white px-6 py-3 rounded-full font-medium shadow-md inline-flex items-center"
-                  whileHover={{ scale: 1.05, backgroundColor: '#7e22ce' }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: animationDuration / 2 }}
-                >
-                  Send Message <ArrowRight className="ml-2 h-5 w-5" />
-                </motion.button>
-              </form>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="bg-purple-900 text-white py-12">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <div className="text-2xl font-bold text-white mr-2">OAC</div>
-                <div className="text-sm font-medium">Oxford Academic Complex</div>
-              </div>
-              <p className="text-gray-400 mb-4">
-                Empowering the next generation of leaders and professionals.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-                            <ul className="space-y-2">
-                {navLinks.map(link => (
-                  <li key={link.id}>
+              </RevealText>
+            </div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="relative rounded-3xl overflow-hidden aspect-[4/5] shadow-2xl"
+            >
+              <img src={aboutImg} alt="Students learning" loading="lazy" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-3xl" />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== PROGRAMS / CURRICULUM ===== */}
+      <section ref={programsRef} id="programs" className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 md:px-6">
+          <RevealText className="mb-16 text-center max-w-3xl mx-auto">
+            <span className="text-brand-700 dark:text-brand-400 font-semibold tracking-wider uppercase text-sm">Curriculum</span>
+            <h2 className="text-4xl md:text-6xl font-display font-bold mt-3 mb-6 text-balance text-gray-900 dark:text-white">Academic Excellence.</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">Comprehensive foundational environments designed to prepare students for our advanced secondary streams.</p>
+          </RevealText>
+
+          {/* Campus Filter */}
+          <div className="mb-8 md:mb-12 flex flex-wrap justify-center gap-2 md:gap-3">
+            {['all', 'bepanda', 'tombel', 'loum'].map((campus) => (
+              <button
+                key={campus}
+                onClick={() => setSelectedCampus(campus)}
+                className={`px-4 md:px-6 py-2 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all ${
+                  selectedCampus === campus 
+                    ? 'bg-brand-900 text-white shadow-lg shadow-brand-900/30' 
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                }`}
+              >
+                {campus === 'all' ? 'All Campuses' : campus.charAt(0).toUpperCase() + campus.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <LayoutGroup>
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              <AnimatePresence mode="popLayout">
+                {filteredPrograms.map((prog, idx) => (
+                  <motion.div 
+                    key={prog.title}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ 
+                      scale: 1.03,
+                      rotateX: 2,
+                      rotateY: 2,
+                      boxShadow: "0 25px 50px -12px rgba(82, 12, 143, 0.25)"
+                    }}
+                    transition={{ 
+                      layout: { duration: 0.3 },
+                      opacity: { duration: 0.2 },
+                      hover: { type: "spring", stiffness: 400, damping: 25 }
+                    }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="group relative rounded-3xl overflow-hidden bg-sand-100 flex flex-col shadow-sm hover:shadow-xl hover:shadow-brand-900/10 transition-all duration-300"
+                    style={{ perspective: 1000 }}
+                  >
+                    <div className="relative h-64 overflow-hidden">
+                      <img src={prog.img} alt={prog.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-80" />
+                      <h3 className="absolute bottom-4 left-6 text-2xl font-display font-bold text-brand-900 dark:text-brand-400">{prog.title}</h3>
+                    </div>
+                    
+                    <div className="p-8 flex flex-col grow">
+                      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-6">{prog.desc}</p>
+                      
+                      <div className="space-y-3 pt-6 border-t border-gray-200">
+                        <div className="flex items-center gap-3 text-sm">
+                          <Clock className="w-5 h-5 text-brand-900 p-1 bg-brand-100 rounded-full" />
+                          <span className="font-semibold text-gray-800 dark:text-gray-200">Duration:</span>
+                          <span className="text-gray-600 dark:text-gray-300">{prog.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm">
+                          <CheckCircle className="w-5 h-5 text-brand-900 p-1 bg-brand-100 rounded-full" />
+                          <span className="font-semibold text-gray-800 dark:text-gray-200">Reqs:</span>
+                          <span className="text-gray-600 dark:text-gray-300">{prog.requirements}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </LayoutGroup>
+
+          <div ref={whyChooseRef} className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 pt-16 border-t border-gray-100">
+            {benefits.map((b, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05, y: -5 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + (i * 0.1), type: "spring", stiffness: 300 }}
+                className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl hover:bg-white/90 transition-all shadow-lg hover:shadow-xl shadow-brand-900/10"
+              >
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6">
+                  {b.icon}
+                </div>
+                <h4 className="text-xl font-display font-bold mb-3">{b.title}</h4>
+                <p className="text-gray-600 dark:text-gray-300 text-[15px] leading-relaxed">{b.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== SECONDARY / HIGH SCHOOL ===== */}
+      <section ref={secondaryRef} id="secondary" className="py-16 md:py-24 bg-brand-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4 md:px-6">
+          <RevealText className="mb-16 text-center max-w-3xl mx-auto">
+            <span className="text-brand-700 dark:text-brand-400 font-semibold tracking-wider uppercase text-sm">Secondary Education</span>
+            <h2 className="text-4xl md:text-6xl font-display font-bold mt-3 mb-6 text-balance text-gray-900 dark:text-white">Excellence in Secondary.</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">Comprehensive secondary education programs preparing students for GCE examinations and future success.</p>
+          </RevealText>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {secondaryPrograms.map((program, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1, duration: 0.6 }}
+                className="bg-white p-8 rounded-3xl shadow-lg hover:shadow-xl transition-shadow"
+              >
+                <h3 className="text-2xl font-display font-bold text-brand-900 dark:text-brand-400">{program.title}</h3>
+                <p className="text-brand-700 dark:text-brand-400 font-medium mb-4">{program.subtitle}</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-6">{program.desc}</p>
+                <ul className="space-y-2">
+                  {program.features.map((feature, fIdx) => (
+                    <li key={fIdx} className="flex items-center gap-2 text-sm text-gray-700">
+                      <CheckCircle className="w-4 h-4 text-brand-900" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+
+          <RevealText delay={0.4} className="mt-12 text-center">
+            <div className="inline-flex items-center gap-2 bg-brand-900 text-white px-6 py-3 rounded-full">
+              <BookOpen className="w-5 h-5" />
+              <span className="font-semibold">GCE Examination Center - Centre No. 11972</span>
+            </div>
+          </RevealText>
+        </div>
+      </section>
+
+      {/* ===== CAMPUSES ===== */}
+      <section ref={campusesRef} id="campuses" className="py-16 md:py-24 bg-brand-950 text-white overflow-hidden">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <RevealText>
+              <h2 className="text-4xl md:text-6xl font-display font-bold text-white">Our Campuses.</h2>
+            </RevealText>
+            <RevealText delay={0.2}>
+              <p className="text-brand-200 dark:text-brand-300 max-w-sm">Serving the South West and Littoral regions with state-of-the-art facilities.</p>
+            </RevealText>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {campuses.map((campus, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1, duration: 0.6 }}
+                className="group relative rounded-3xl overflow-hidden min-h-[400px]"
+              >
+                <img src={campus.img} alt={campus.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-brand-950/40 group-hover:bg-brand-950/20 transition-colors duration-500" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 md:p-12">
+                  <div className="glass border border-white/20 p-4 md:p-6 rounded-2xl backdrop-blur-xl translate-y-4 group-hover:translate-y-0 transition-transform duration-500 bg-white/10 dark:bg-black/30">
+                    <div className="flex items-center gap-3 mb-2">
+                      <MapPin className="text-brand-300 w-5 h-5" />
+                      <h3 className="text-xl md:text-2xl font-display font-bold text-white">{campus.name}</h3>
+                    </div>
+                    <p className="text-white/80 text-sm leading-relaxed mb-4">{campus.desc}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {campus.programs.map((prog, pIdx) => (
+                        <span key={pIdx} className="text-xs bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white">{prog}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== ADMISSIONS ===== */}
+      <section ref={admissionsRef} id="admissions" className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 md:px-6">
+          <RevealText className="mb-16 text-center max-w-3xl mx-auto">
+            <span className="text-brand-700 dark:text-brand-400 font-semibold tracking-wider uppercase text-sm">Admissions</span>
+            <h2 className="text-4xl md:text-6xl font-display font-bold mt-3 mb-6 text-balance text-gray-900 dark:text-white">Join Our Community.</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">Secure your child's future with Oxford Academic Complex. Admissions are competitive for the upcoming academic year.</p>
+          </RevealText>
+
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12">
+            <RevealText>
+              <div className="bg-sand-100 p-8 rounded-3xl">
+                <h3 className="text-2xl font-display font-bold text-brand-900 dark:text-brand-400 mb-6">Admission Requirements</h3>
+                <ul className="space-y-4">
+                  {[
+                    'Previous report card',
+                    'Birth certificate',
+                    'Passport-size photograph',
+                    'National identity photocopy'
+                  ].map((req, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-brand-900 shrink-0 mt-0.5" />
+                      <span className="text-gray-700 dark:text-gray-300">{req}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8 p-4 bg-brand-50 rounded-xl">
+                  <p className="text-sm text-brand-900 font-medium mb-2">Special Offer:</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Fee reduction available for families with 4 or more children.</p>
+                </div>
+              </div>
+            </RevealText>
+
+            <RevealText delay={0.2}>
+              <div className="bg-sand-100 p-8 rounded-3xl">
+                <h3 className="text-2xl font-display font-bold text-brand-900 dark:text-brand-400 mb-6">Why Choose OAC?</h3>
+                <ul className="space-y-4">
+                  {[
+                    'Purely Anglo-Saxon Education',
+                    'Qualified GCE Examiners as Teachers',
+                    '17+ Years of Experience',
+                    'Calm & Conducive Learning Environment',
+                    'Flexible Payment Options',
+                    'Gender Equality & Opportunity'
+                  ].map((reason, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-brand-900 shrink-0 mt-0.5" />
+                      <span className="text-gray-700 dark:text-gray-300">{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </RevealText>
+          </div>
+
+          <RevealText delay={0.3} className="mt-12 text-center">
+            <button onClick={() => scrollToSection(contactRef)} className="px-8 py-4 bg-brand-900 text-white rounded-full font-semibold hover:bg-brand-800 transition-colors flex items-center justify-center gap-2 mx-auto">
+              Start Admission Process <ArrowRight className="w-5 h-5" />
+            </button>
+          </RevealText>
+        </div>
+      </section>
+
+      {/* ===== UNIFORM ===== */}
+      <section ref={uniformRef} id="uniform" className="py-16 md:py-24 bg-brand-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4 md:px-6">
+          <RevealText className="mb-16 text-center max-w-3xl mx-auto">
+            <span className="text-brand-700 dark:text-brand-400 font-semibold tracking-wider uppercase text-sm">School Uniform</span>
+            <h2 className="text-4xl md:text-6xl font-display font-bold mt-3 mb-6 text-balance text-gray-900 dark:text-white">Our Uniform Policy.</h2>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">Students are required to wear the official school uniform to maintain discipline and identity.</p>
+          </RevealText>
+
+          <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
+            <RevealText>
+              <div className="bg-white p-8 rounded-3xl shadow-lg">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center">
+                    <Users className="w-6 h-6 text-brand-900" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-brand-900 dark:text-brand-400">Boys Uniform</h3>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-brand-900" />
+                    <span>Short sleeves purple shirt</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-brand-900" />
+                    <span className="dark:text-gray-200">Dark gray classic trousers</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-brand-900" />
+                    <span>Black or brown shoes/sandals only</span>
+                  </li>
+                </ul>
+              </div>
+            </RevealText>
+
+            <RevealText delay={0.2}>
+              <div className="bg-white p-8 rounded-3xl shadow-lg">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-brand-100 rounded-full flex items-center justify-center">
+                    <Users className="w-6 h-6 text-brand-900" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold text-brand-900 dark:text-brand-400">Girls Uniform</h3>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-brand-900" />
+                    <span>Short sleeves purple shirt</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-brand-900" />
+                    <span>Dark gray A-shaped skirt with 3 pleats</span>
+                  </li>
+                  <li className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-brand-900" />
+                    <span>Black or brown shoes/sandals only</span>
+                  </li>
+                </ul>
+              </div>
+            </RevealText>
+          </div>
+
+          <RevealText delay={0.3} className="mt-8 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-300">Uniforms can be purchased at designated locations. <span className="text-brand-900 font-semibold">CHANGE ME: Add uniform purchase location</span></p>
+          </RevealText>
+        </div>
+      </section>
+
+      {/* ===== CONTACT & CTA (Production Forms) ===== */}
+      <section ref={contactRef} id="contact" className="py-16 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="bg-sand-100 dark:bg-gray-700 rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 lg:p-16 overflow-hidden relative shadow-2xl shadow-brand-900/5">
+            
+            {/* Background Blob */}
+            <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 bg-brand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob" />
+            <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 bg-brand-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000" />
+
+            <div className="grid lg:grid-cols-2 gap-8 md:gap-12 relative z-10 items-center">
+              <div>
+                <RevealText>
+                  <h2 className="text-4xl md:text-5xl lg:text-7xl font-display font-bold tracking-tight mb-6 text-balance">Ensure your child's success.</h2>
+                </RevealText>
+                <RevealText delay={0.1}>
+                  <p className="text-gray-600 dark:text-gray-300 text-lg mb-12 max-w-md leading-relaxed">Applications are heavily competitive for the upcoming academic year. Secure your spot by contacting our admissions office today.</p>
+                </RevealText>
+                
+                <RevealText delay={0.2} className="space-y-6">
+                  <div className="flex items-center gap-4 group cursor-pointer">
+                    <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:bg-brand-900 group-hover:text-white transition-colors duration-300">
+                      <Phone className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Admissions Hotline</p>
+                      <p className="text-xl font-display font-medium">+237 677 484 187</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 group cursor-pointer">
+                    <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:bg-brand-900 group-hover:text-white transition-colors duration-300">
+                      <Mail className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Email Us</p>
+                      <p className="text-xl font-display font-medium">admissions@oacameroon.org</p>
+                    </div>
+                  </div>
+                </RevealText>
+              </div>
+
+              {/* Functional Production Form powered by Formspree */}
+              <RevealText delay={0.3}>
+                <div className="bg-white dark:bg-gray-800 p-6 md:p-8 lg:p-10 rounded-2xl md:rounded-3xl shadow-xl shadow-brand-900/5">
+                  <h3 className="text-2xl font-display font-bold mb-8 text-gray-900 dark:text-white">Send an Enquiry</h3>
+                  
+                  <form action={`https://formspree.io/f/${import.meta.env.VITE_FORMSPREE_ID}`} method="POST" className="space-y-5">
+                    {/* Hidden fields for Formspree */}
+                    <input type="hidden" name="_subject" value="New Admission Enquiry from OAC Website" />
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Parent's Full Name</label>
+                      <input 
+                        required
+                        type="text" 
+                        name="name"
+                        id="name"
+                        autoComplete="name"
+                        className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-5 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-gray-900 dark:text-white"
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Email Address</label>
+                      <input 
+                        required
+                        type="email" 
+                        name="email"
+                        id="email"
+                        autoComplete="email"
+                        className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-5 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all text-gray-900 dark:text-white"
+                        placeholder="john@example.com"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="message" className="text-sm font-semibold text-gray-700 dark:text-gray-300 ml-1">Program Interest & Message</label>
+                      <textarea 
+                        required
+                        name="message"
+                        id="message"
+                        rows="4" 
+                        className="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 px-5 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all resize-none"
+                        placeholder="I am interested in enrolling my child in..."
+                      />
+                    </div>
                     <button 
-                      type="button"
-                      className="text-gray-400 hover:text-white transition-colors"
-                      onClick={() => scrollToSection(link.ref)}
+                      type="submit" 
+                      className="w-full py-4 bg-brand-900 text-white rounded-xl font-semibold hover:bg-brand-800 transition-colors flex items-center justify-center gap-2"
                     >
-                      {link.label}
+                      Secure Your Spot <ArrowRight className="w-5 h-5" />
                     </button>
+                    <p className="text-xs text-center text-gray-400 mt-4">By submitting, you agree to our admissions privacy protocols.</p>
+                  </form>
+                </div>
+              </RevealText>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== FOOTER ===== */}
+      <footer className="bg-brand-950 text-white py-12 md:py-16 border-t border-white/10">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12 lg:gap-16 mb-12 md:mb-16">
+            <div>
+              <span className="text-3xl font-display font-bold tracking-tight mb-6 flex items-center gap-2">OAC.</span>
+              <p className="text-white/60 leading-relaxed mb-8 max-w-sm">
+                Centre No. 11972. A recognized leader in primary, secondary, and technical education in the Kupe-Manengouba division.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" aria-label="Instagram" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-500 transition-colors"><Instagram className="w-5 h-5" /></a>
+                <a href="#" aria-label="Twitter" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-500 transition-colors"><Twitter className="w-5 h-5" /></a>
+                <a href="#" aria-label="LinkedIn" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-brand-500 transition-colors"><Linkedin className="w-5 h-5" /></a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-display font-semibold mb-6">Quick Links</h4>
+              <ul className="space-y-4">
+                {navLinks.map((link) => (
+                  <li key={link.id}>
+                    <button onClick={() => scrollToSection(link.ref)} className="text-white/60 hover:text-white transition-colors">{link.label}</button>
                   </li>
                 ))}
               </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>+237 677484187</li>
-                <li>info@oxfordacademiccomplex.com</li>
-                <li>Loum & Tombel Campuses, Cameroon</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-8 text-center text-gray-500 border-t border-purple-800 pt-8">
-            &copy; 2024 Oxford Academic Complex. All Rights Reserved.
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
+            </div>
+
+            <div>
+              <h4 className="text-lg font-display font-semibold mb-6">Our Campuses</h4>
+              <ul className="space-y-4 text-white/60">
+                <li className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-brand-400 shrink-0 mt-0.5" />
+                  <span>Behind CAMTEL, Bepanda Mallah-Douala<br/>Littoral Region, CMR</span>
+                </li>
+                <li className="flex items-start gap-3 mt-4">
+                  <MapPin className="w-5 h-5 text-brand-400 shrink-0 mt-0.5" />
+                  <span>Main Road, Tombel<br/>South West Region, CMR</span>
+                </li>
+                <li className="flex items-start gap-3 mt-4">
+                  <MapPin className="w-5 h-5 text-brand-400 shrink-0 mt-0.5" />
+                  <span>Littoral Hub, Loum<br/>Littoral Region, CMR</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-white/40 text-sm">
+            <p>&copy; {new Date().getFullYear()} Oxford Academic Complex. All rights reserved.</p>
+            <div className="flex gap-6">
+              <span className="cursor-pointer hover:text-white transition-colors">Privacy Policy</span>
+              <span className="cursor-pointer hover:text-white transition-colors">Admissions Terms</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }
