@@ -173,7 +173,7 @@ export default function OxfordAcademicComplex() {
       img: campusTombel, // Using existing image as placeholder
       desc: 'Behind CAMTEL, Bepanda Mallah-Douala. Secondary/College campus offering General, Technical, and Commercial education.',
       programs: ['Secondary Only', 'General Education', 'Technical/Vocational', 'Commercial'],
-      contact: '+237 XXX XXX XXX', // CHANGE ME: Actual phone number
+      contact: '+237 677 484 187', // CHANGE ME: Actual phone number
       address: 'Behind CAMTEL, Bepanda Mallah-Douala' // CHANGE ME: Exact address
     },
     {
@@ -181,7 +181,7 @@ export default function OxfordAcademicComplex() {
       img: campusTombel,
       desc: 'Tombel, South West Region. Our historic main center offering Nursery, Primary, and Secondary education.',
       programs: ['Nursery', 'Primary', 'Secondary'],
-      contact: '+237 XXX XXX XXX', // CHANGE ME: Actual phone number
+      contact: '+237 677 484 187', // CHANGE ME: Actual phone number
       address: 'Main Road, Tombel, South West Region, CMR' // CHANGE ME: Exact address
     },
     {
@@ -189,7 +189,7 @@ export default function OxfordAcademicComplex() {
       img: campusLoum,
       desc: 'Loum, Littoral Region. A vibrant, modern hub serving our coastal students with Nursery education.',
       programs: ['Nursery Only'],
-      contact: '+237 XXX XXX XXX', // CHANGE ME: Actual phone number
+      contact: '+237 677 484 187', // CHANGE ME: Actual phone number
       address: 'Littoral Hub, Loum, Littoral Region, CMR' // CHANGE ME: Exact address
     }
   ];
@@ -721,7 +721,7 @@ export default function OxfordAcademicComplex() {
           </div>
 
           <RevealText delay={0.3} className="mt-8 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-300">Uniforms can be purchased at designated locations. <span className="text-brand-900 font-semibold">CHANGE ME: Add uniform purchase location</span></p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Uniforms can be purchased at designated locations. <span className="text-brand-900 font-semibold">Contact us for more information</span></p>
           </RevealText>
         </div>
       </section>
