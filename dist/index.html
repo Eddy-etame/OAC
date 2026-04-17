@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="canonical" href="https://www.oacameroon.org/" />
+    <link rel="canonical" href="https://oxford-academic-complex.vercel.app/" />
     
     <!-- Primary Meta Tags -->
     <title>Oxford Academic Complex | Elite Education in Cameroon - Nursery, Primary, Secondary & Technical Education</title>
@@ -16,20 +16,24 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.oacameroon.org/" />
+    <meta property="og:url" content="https://oxford-academic-complex.vercel.app/" />
     <meta property="og:title" content="Oxford Academic Complex | Elite Education in Cameroon" />
     <meta property="og:description" content="Official MINESEC center providing nursery, primary, secondary, and technical/vocational education across 3 campuses in Cameroon. 17+ years of educational excellence." />
-    <meta property="og:image" content="/favicon.svg" />
+    <meta property="og:image" content="https://oxford-academic-complex.vercel.app/og-image.png" />
     <meta property="og:site_name" content="Oxford Academic Complex" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://www.oacameroon.org/" />
+    <meta name="twitter:url" content="https://oxford-academic-complex.vercel.app/" />
     <meta name="twitter:title" content="Oxford Academic Complex | Elite Education in Cameroon" />
     <meta name="twitter:description" content="Official MINESEC center providing nursery, primary, secondary, and technical/vocational education across 3 campuses in Cameroon." />
-    <meta name="twitter:image" content="/favicon.svg" />
+    <meta name="twitter:image" content="https://oxford-academic-complex.vercel.app/og-image.png" />
 
+    <meta name="theme-color" content="#520c8f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
@@ -37,34 +41,60 @@
       "@type": "EducationalOrganization",
       "name": "Oxford Academic Complex",
       "alternateName": "OAC",
-      "url": "https://www.oacameroon.org",
-      "logo": "https://www.oacameroon.org/favicon.svg",
-      "description": "Official MINESEC center and GCE Examination Center providing nursery, primary, secondary, and technical/vocational education across Bepanda, Tombel, and Loum campuses in Cameroon.",
+      "url": "https://oxford-academic-complex.vercel.app",
+      "logo": "https://oxford-academic-complex.vercel.app/favicon.svg",
+      "image": "https://oxford-academic-complex.vercel.app/og-image.png",
+      "description": "Official MINESEC center and GCE Examination Center providing nursery, primary, secondary, and technical/vocational education across Douala, Tombel, and Loum campuses in Cameroon.",
       "foundingDate": "2007",
       "numberOfEmployees": "50+",
-      "address": [
+      "priceRange": "$$",
+      "areaServed": "CM",
+      "openingHoursSpecification": [
         {
-          "@type": "PostalAddress",
-          "addressLocality": "Bepanda",
-          "addressRegion": "Littoral",
-          "addressCountry": "CM"
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "07:30",
+          "closes": "16:00"
+        }
+      ],
+      "location": [
+        {
+          "@type": "Place",
+          "name": "Douala Campus (Bepanda)",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Behind CAMTEL, Bepanda Mallah",
+            "addressLocality": "Douala",
+            "addressRegion": "Littoral",
+            "addressCountry": "CM"
+          }
         },
         {
-          "@type": "PostalAddress",
-          "addressLocality": "Tombel",
-          "addressRegion": "South West",
-          "addressCountry": "CM"
+          "@type": "Place",
+          "name": "Tombel Campus (Main Center)",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Main Road",
+            "addressLocality": "Tombel",
+            "addressRegion": "South West",
+            "addressCountry": "CM"
+          }
         },
         {
-          "@type": "PostalAddress",
-          "addressLocality": "Loum",
-          "addressRegion": "Littoral",
-          "addressCountry": "CM"
+          "@type": "Place",
+          "name": "Loum Campus (Littoral Hub)",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Littoral Hub",
+            "addressLocality": "Loum",
+            "addressRegion": "Littoral",
+            "addressCountry": "CM"
+          }
         }
       ],
       "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+237-XXX-XXX-XXX",
+        "telephone": "+237-677-484-187",
         "contactType": "admissions",
         "email": "admissions@oacameroon.org",
         "areaServed": "CM",
@@ -73,45 +103,79 @@
       "sameAs": [
         "https://www.facebook.com/oacameroon",
         "https://twitter.com/oacameroon",
+        "https://www.instagram.com/oacameroon",
         "https://www.linkedin.com/company/oxford-academic-complex"
-      ],
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "Educational Programs",
-        "itemListElement": [
-          {
-            "@type": "Course",
-            "name": "Nursery Education",
-            "description": "Early childhood education for ages 2-5"
-          },
-          {
-            "@type": "Course",
-            "name": "Primary Education",
-            "description": "Elementary education for ages 6-11"
-          },
-          {
-            "@type": "Course",
-            "name": "Secondary Education",
-            "description": "High school education with GCE preparation"
-          },
-          {
-            "@type": "Course",
-            "name": "Technical/Vocational Education",
-            "description": "Skills-based technical training programs"
-          }
-        ]
-      }
+      ]
     }
     </script>
+
+    <!-- FAQ Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What educational system does OAC follow?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "OAC follows the purely Anglo-Saxon (English-language) system of education as prescribed by MINESEC. All instruction, examinations, and administration are conducted in English, following the official GCE Board syllabi."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What academic programs does OAC offer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We offer Nursery (ages 3-5) at Tombel and Loum, Primary (Classes 1-6) at Tombel, and Secondary education at Douala-Bepanda. Secondary streams include General Education (Arts & Science), Technical Education (Accounting, IT, Secretarial), and Commercial Education (Business, Entrepreneurship)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is OAC a registered GCE Examination Center?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Oxford Academic Complex is officially registered as GCE Board Examination Center — Centre No. 11972, at our Douala-Bepanda campus. Students sit for GCE O-Level and A-Level examinations on-site."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What documents are needed for admission?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Required: previous report card (original + photocopy), birth certificate (original + photocopy), two passport-size photographs, parent/guardian ID photocopy, and a medical certificate of fitness for new students."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where are the OAC campuses located?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Three campuses: Douala (behind CAMTEL, Bepanda Mallah — Secondary & Technical), Tombel (Main Road — Nursery, Primary & Secondary, founding campus since 2007), and Loum (Littoral Hub — Nursery)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How flexible are the school fees?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "OAC has one of the most flexible payment structures in the region. Parents pay at their convenience throughout the year. Fee reductions available for families with 4+ children enrolled. Contact the bursar's office for details."
+          }
+        }
+      ]
+    }
+    </script>
+
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/index-97839cd4.js"></script>
-    <link rel="stylesheet" href="/assets/index-676d4ae3.css">
+    <script type="module" crossorigin src="/assets/index-7c97b34e.js"></script>
+    <link rel="stylesheet" href="/assets/index-9d3cfcde.css">
   </head>
-  <body class="bg-gray-50 text-gray-900 antialiased selection:bg-brand-500 selection:text-white">
+  <body class="bg-gray-50 text-gray-900 antialiased selection:bg-brand-500 selection:text-white scroll-smooth">
     <div id="root"></div>
     
   </body>

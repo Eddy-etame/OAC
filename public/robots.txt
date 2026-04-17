@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.oacameroon.org/sitemap.xml
+Sitemap: https://oxford-academic-complex.vercel.app/sitemap.xml
