@@ -148,7 +148,7 @@ export default function Header() {
                   transition={{ delay: idx * 0.05 }}
                 >
                   <Link
-                    to={link.path}
+                    href={link.path}
                     onClick={() => setIsMenuOpen(false)}
                     className={`block w-full text-left px-6 py-4 rounded-2xl text-2xl font-display font-bold transition-all ${
                       activePath === link.path 

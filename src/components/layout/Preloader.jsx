@@ -12,16 +12,12 @@ export default function Preloader() {
     if (typeof window !== 'undefined') {
       const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse/i.test(navigator.userAgent);
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const hasVisited = sessionStorage.getItem('visited_oac');
       
-      if (isBot || prefersReducedMotion || hasVisited) {
+      // Bypass preloader only for bots and accessibility overrides
+      if (isBot || prefersReducedMotion) {
         setIsExit(true);
-        if (!isBot && !prefersReducedMotion) {
-          sessionStorage.setItem('visited_oac', 'true');
-        }
         return;
       }
-      sessionStorage.setItem('visited_oac', 'true');
     }
 
     const duration = 2500; // 2.5 seconds

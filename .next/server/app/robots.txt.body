@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://oxford-academic-complex.vercel.app/sitemap.xml
