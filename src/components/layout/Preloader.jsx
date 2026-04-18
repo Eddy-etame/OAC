@@ -7,8 +7,11 @@ import Logo from '../ui/Logo';
 export default function Preloader() {
   const [progress, setProgress] = useState(0);
   const [isExit, setIsExit] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+    
     if (typeof window !== 'undefined') {
       const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse/i.test(navigator.userAgent);
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -53,7 +56,7 @@ export default function Preloader() {
         >
           {/* Decorative background glass particles */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(20)].map((_, i) => (
+            {isMounted && [...Array(20)].map((_, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: Math.random() * 1000 }}

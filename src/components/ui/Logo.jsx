@@ -65,7 +65,7 @@ export default function Logo({ className = "", isScrolled = false, isMenuOpen = 
         </svg>
       </motion.div>
       
-      <div className="flex flex-col">
+      <div className="hidden sm:flex flex-col">
         <span className={`font-display font-bold text-xl leading-none tracking-tight ${isOpaque ? 'text-brand-900 dark:text-white' : 'text-white'} dark:text-brand-400`}>
           Oxford
         </span>
